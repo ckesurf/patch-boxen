@@ -32,8 +32,9 @@ github "repository", "2.0.2"
 github "ruby",       "4.1.0"
 github "stdlib",     "4.0.2", :repo => "puppetlabs/puppetlabs-stdlib"
 github "sudo",       "1.0.0"
-github "sublime_text_2",	"1.1.1"
 
 
 # Optional/custom modules. There are tons available at
 # https://github.com/boxen.
+
+github "sublime_text_2",	"1.1.1"
