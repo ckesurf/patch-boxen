@@ -49,23 +49,6 @@ Service {
 Homebrew::Formula <| |> -> Package <| |>
 
 
-file { 'code':
-    path => "/Users/${id}/code",
-    ensure => directory,
-}
-
-repository { 'kickass':
-    source   => 'patch-engineering/kickass.git',
-    path     => '/Users/${id}/code',
-    provider => 'git',
-    require => File['code'],
-}
-
-exec { 'git submodule update --init':
-  cwd => "/Users/${id}/code",
-  require => Repository['kickass'],
-}
-
 
 
 
@@ -105,27 +88,6 @@ node default {
   file { "${boxen::config::srcdir}/our-boxen":
     ensure => link,
     target => $boxen::config::repodir
-  }
-
-  include sublime_text_2
-  sublime_text_2::package { 'Emmet':
-      source => 'sergeche/emmet-sublime'
-  }
-
-  file { '.ivy2':
-    path => "/Users/${id}/.ivy2",
-    ensure => directory,
-  }
-
-# indentation looks ugly here, not much I can do about it though :/
-  file { '.credentials':
-    path => "/Users/${id}/.ivy2/.credentials",
-    ensure => present,
-    require => File['.ivy2'],
-    content => "realm=Sonatype Nexus Repository Manager
-host=patch-nexus-a01.ihost.aol.com
-user=deploy
-password=P4tch-deploy!
   }
 
 
