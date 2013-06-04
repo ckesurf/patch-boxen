@@ -1,0 +1,233 @@
+
+  ############## PostGres ############## 
+  include postgresapp
+
+  exec {'pg db':
+    command => "initdb /usr/local/var/postgres -E utf8",
+    require => Class['postgresapp'],
+  }
+
+
+
+  ############## Text Editor ############## 
+
+
+# this works!
+#  include sublime_text_2
+#  sublime_text_2::package { 'Emmet':
+#      source => 'sergeche/emmet-sublime'
+#  }
+
+  ############## Credentials ############## 
+
+
+  file { '.ivy2':
+    path => "/Users/${boxen_user}/.ivy2",
+    ensure => directory,
+  }
+
+  file { '.credentials':
+    path => "/Users/${boxen_user}/.ivy2/.credentials",
+    ensure => present,
+    require => File['.ivy2'],
+    content => "realm=Sonatype Nexus Repository Manager
+host=patch-nexus-a01.ihost.aol.com
+user=deploy
+password=P4tch-deploy!",
+  }
+
+
+
+
+
+
+
+
+
+
+  ############## PostGres ############## 
+  include postgresapp
+
+  exec {'pg db':
+    command => "initdb /usr/local/var/postgres -E utf8",
+    require => Class['postgresapp'],
+  }
+
+
+
+  exec {'pg host':
+    command => "sed -i.bak 's:host    all             all             127.0.0.1/32            trust:host    all             all             127.0.0.1/32            md5:' /usr/local/var/postgres/pg_hba.conf"
+    require => Exec['pg db'],
+  }
+
+
+  ############## For Kickass ############## 
+
+
+  file { 'code':
+    path => "/Users/${boxen_user}/code",
+    ensure => directory,
+  }
+
+  exec {'kickass':
+    cwd => "/Users/${boxen_user}/code",
+    command => "git clone git@github.com:patch-engineering/kickass.git",
+    require => File['code'],
+    timeout => 0,
+  }
+
+  exec {'submodule':
+    cwd => "/Users/${boxen_user}/code/kickass",
+    command => "git submodule update --init",
+    require => Exec['kickass'],
+  }
+
+
+
+
+
+
+
+  ############## PSQL ############## 
+
+
+
+  include postgresql
+
+  # For creating the patchy superuser
+  # I am 99% sure this works. 
+  exec { 'superuser':
+	 command => "psql -h localhost postgres -c \"create role patchy with createdb login password 'patchy'; ALTER ROLE patchy WITH SUPERUSER;\"",
+	 require => Class['postgresql'],
+  }
+
+  exec { 'patchy db':
+  	command => "createdb -U patchy patchy -h localhost",
+  	require => Class['postgresapp']
+  }
+
+  exec { 'patchy_test db':
+  	command => "createdb -U patchy patchy_test -h localhost",
+    require => Class['postgresapp']
+
+  }
+
+  exec { 'patchy_api db':
+  	command => "createdb -U patchy patchy_api -h localhost",
+    require => Class['postgresapp']
+
+  }
+
+  exec { 'postgis':
+  	command => "brew install postgis",
+  }
+
+  exec { 'patchy postgis':
+  	command => "psql -d patchy -f /usr/local/share/postgis/postgis.sql -h localhost",
+  	require => ,
+  }
+
+  exec { 'patchy spatial':
+  	command => "psql -d patchy -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
+  	require => ,
+  }
+
+  exec { 'patchy_test postgis':
+  	command => "psql -d patchy_test -f /usr/local/share/postgis/postgis.sql -h localhost",
+  	require => ,
+  }
+
+  exec { 'patchy_test spatial':
+  	command => "psql -d patchy_test -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
+  	require => ,
+  }
+
+    exec { 'patchy_api postgis':
+  	command => "psql -d patchy_api -f /usr/local/share/postgis/postgis.sql -h localhost",
+  	require => ,
+  }
+
+  exec { 'patchy_api spatial':
+  	command => "psql -d patchy_api -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
+  	require => ,
+  }
+
+Exec['postgis'] -> Exec['patchy postgis'] -> Exec['patchy spatial'] -> Exec['patchy_test postgis'] -> Exec['patchy_test spatial'] -> Exec['patchy_api postgis'] -> Exec['patchy_api spatial']
+
+
+
+############## For Rails migrations ############## 
+
+
+  exec { 'bundler':
+    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    command => "sudo gem install bundler",
+    require => Exec['submodule'],
+  }
+
+  exec { 'bundle install':
+    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    command => "bundle install",
+    require => Exec['bundler'],
+  }
+
+  file { 'database':
+    path => "/Users/${boxen_user}/code/kickass/migrations/config/database.yml.sample",
+    ensure => present,
+    source => "/Users/${boxen_user}/code/kickass/migrations/config/database.yml",
+    require => Exec['bundle install'],
+  }
+
+  exec { 'migrate':
+    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    command => "rake db:migrate",
+    require => File['database'],
+  }
+
+
+
+############## Setting up the App ############## 
+
+  file { 'assets_dims.js.sample':
+    path => "/Users/${boxen_user}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
+    ensure => present,
+    source => "/Users/${boxen_user}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
+    require => Exec['kickass'],
+  }
+
+
+  file { 'web: application.conf.sample':
+    path => "/Users/${boxen_user}/code/kickass/web/conf/application.conf.sample",
+    ensure => present,
+    source => "/Users/${boxen_user}/code/kickass/web/conf/application.conf",
+    require => Exec['kickass'],
+  }
+
+  file { 'api: application.conf.sample':
+    path => "/Users/${boxen_user}/code/kickass/api/conf/application.conf.sample",
+    ensure => present,
+    source => "/Users/${boxen_user}/code/kickass/api/conf/application.conf",
+    require => Exec['kickass'],
+  }
+
+
+# Adding the appropriate hosts (local patch communities) to your /etc/hosts file
+
+
+
+  exec { 'newline':
+    command => "echo \$\"\\n# chriswashere\" >> /etc/hosts",
+    user => root,
+    require => Class['postgresql'],
+
+  }
+
+  exec { 'subdomains':
+    command => "/usr/local/bin/psql -U patchy -A -tc \"SELECT subdomain FROM communities;\" | column -t | sed -e 's/^/127.0.0.1 /' -e 's/\$/.patch.local/' >> /etc/hosts",
+    user => root,
+    require => Exec['newline'],
+
+  }
+
+  include java
+
