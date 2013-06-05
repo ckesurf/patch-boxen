@@ -44,6 +44,15 @@ password=P4tch-deploy!",
     require => Exec['pg db'],
   }
 
+  exec {'psql conf1':
+    command => "sed -i.bak 's:max_connections = 20:max_connections = 50:' /usr/local/var/postgres/postgresql.conf",
+    require => Exec['pg db'],
+  }
+
+  exec {'psql conf2':
+    command => "sed -i.bak 's:shared_buffers = 1600kB:shared_buffers = 500kB:' /usr/local/var/postgres/postgresql.conf",
+    require => Exec['psql conf1'],
+  }
 
   ############## For Kickass ############## 
 

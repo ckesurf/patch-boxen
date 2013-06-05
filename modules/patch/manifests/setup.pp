@@ -33,10 +33,5 @@
   }
 
 
-  exec { 'postgis':
-    command => "brew install postgis",
-    require => Class['postgresql'],
-    timeout => 0,
-  }
 
 }
