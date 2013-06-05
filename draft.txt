@@ -1,11 +1,13 @@
 
 
+
   ############## Text Editor ############## 
 
   include sublime_text_2
   sublime_text_2::package { 'Emmet':
       source => 'sergeche/emmet-sublime'
   }
+
 
 
   ############## Credentials ############## 
@@ -26,13 +28,15 @@ password=P4tch-deploy!",
   }
 
 
-  ############## PostGres ############## 
 
+  ############## PostGres ############## 
   include postgresapp
+  include postgresql
+  include sysctl          # for postgresql  
 
   exec {'pg db':
     command => "initdb /usr/local/var/postgres -E utf8",
-    require => Class['postgresapp'],
+    require => Class['postgresql'],
   }
 
   exec {'pg host':
@@ -68,11 +72,7 @@ password=P4tch-deploy!",
 
 
 
-  ############## PSQL ############## 
-
-
-
-  include postgresql
+  ############## PSQL stuff ############## 
 
   # For creating the patchy superuser
   # I am 99% sure this works. 
@@ -83,54 +83,50 @@ password=P4tch-deploy!",
 
   exec { 'patchy db':
   	command => "createdb -U patchy patchy -h localhost",
-  	require => Class['postgresapp']
+  	require => Class['postgresql']
   }
 
   exec { 'patchy_test db':
   	command => "createdb -U patchy patchy_test -h localhost",
-    require => Class['postgresapp']
+    require => Class['postgresql']
 
   }
 
   exec { 'patchy_api db':
   	command => "createdb -U patchy patchy_api -h localhost",
-    require => Class['postgresapp']
-
+    require => Class['postgresql']
   }
 
   exec { 'postgis':
   	command => "brew install postgis",
+    require => Class['postgresql'],
+    timeout => 0,
   }
 
   exec { 'patchy postgis':
   	command => "psql -d patchy -f /usr/local/share/postgis/postgis.sql -h localhost",
-  	require => ,
   }
 
   exec { 'patchy spatial':
   	command => "psql -d patchy -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
-  	require => ,
   }
 
   exec { 'patchy_test postgis':
   	command => "psql -d patchy_test -f /usr/local/share/postgis/postgis.sql -h localhost",
-  	require => ,
   }
 
   exec { 'patchy_test spatial':
   	command => "psql -d patchy_test -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
-  	require => ,
   }
 
     exec { 'patchy_api postgis':
   	command => "psql -d patchy_api -f /usr/local/share/postgis/postgis.sql -h localhost",
-  	require => ,
   }
 
   exec { 'patchy_api spatial':
   	command => "psql -d patchy_api -f /usr/local/share/postgis/spatial_ref_sys.sql -h localhost",
-  	require => ,
   }
+
 
 Exec['postgis'] -> Exec['patchy postgis'] -> Exec['patchy spatial'] -> Exec['patchy_test postgis'] -> Exec['patchy_test spatial'] -> Exec['patchy_api postgis'] -> Exec['patchy_api spatial']
 

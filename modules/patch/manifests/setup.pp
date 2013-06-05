@@ -3,20 +3,40 @@
  class patch::setup {
 
 
-
-
-  ############## PostGres ############## 
   include postgresapp
   include postgresql
-  include sysctl    # for postgresql  
+  include sysctl          # for postgresql  
 
-  exec {'pg db':
-    command => "initdb /usr/local/var/postgres -E utf8",
+  ############## PSQL stuff ############## 
+
+  # For creating the patchy superuser
+  # I am 99% sure this works. 
+  exec { 'superuser':
+   command => "psql -h localhost postgres -c \"create role patchy with createdb login password 'patchy'; ALTER ROLE patchy WITH SUPERUSER;\"",
+   require => Class['postgresql'],
+  }
+
+  exec { 'patchy db':
+    command => "createdb -U patchy patchy -h localhost",
+    require => Class['postgresql']
+  }
+
+  exec { 'patchy_test db':
+    command => "createdb -U patchy patchy_test -h localhost",
+    require => Class['postgresql']
+
+  }
+
+  exec { 'patchy_api db':
+    command => "createdb -U patchy patchy_api -h localhost",
+    require => Class['postgresql']
+  }
+
+
+  exec { 'postgis':
+    command => "brew install postgis",
     require => Class['postgresql'],
+    timeout => 0,
   }
 
-  exec {'pg host':
-    command => "sed -i.bak 's:host    all             all             127.0.0.1/32            trust:host    all             all             127.0.0.1/32            md5:' /usr/local/var/postgres/pg_hba.conf",
-    require => Exec['pg db'],
-  }
 }
