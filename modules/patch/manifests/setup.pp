@@ -8,10 +8,11 @@
   ############## PostGres ############## 
   include postgresapp
   include postgresql
+  include sysctl    # for postgresql  
 
   exec {'pg db':
     command => "initdb /usr/local/var/postgres -E utf8",
-    require => Class['postgresapp'],
+    require => Class['postgresql'],
   }
 
   exec {'pg host':
