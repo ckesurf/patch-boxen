@@ -44,7 +44,6 @@ Repository {
 
 Service {
   provider => ghlaunchd,
-  ensure => stopped,
 }
 
 Homebrew::Formula <| |> -> Package <| |>
