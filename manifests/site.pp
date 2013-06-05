@@ -51,7 +51,7 @@ Homebrew::Formula <| |> -> Package <| |>
 
 node default {
   # core modules, needed for most things
-  include dnsmasq
+#  include dnsmasq
   include git
   include hub
 #  include nginx
@@ -87,8 +87,12 @@ node default {
     target => $boxen::config::repodir
   }
 
+  stage { 'last': require => Stage['main'] }
+  
 
-  include patch::setup
+  class {'patch::setup':
+    stage => 'last'
+  }
 
 
 }

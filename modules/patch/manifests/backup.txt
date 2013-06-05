@@ -1,0 +1,124 @@
+  include postgresapp
+  include postgresql
+  include sysctl          # for postgresql  
+  include dnsmasq
+
+  
+
+  ############## PSQL stuff ############## 
+
+  class patch::setup::stop_dnsmasq inherits dnsmasq {
+    Service['dev.dnsmasq'] { ensure  => stopped }
+
+    notify { "dnsmasq has stopped, maybe":
+    }
+  }
+
+  class patch::setup::stop_psql inherits postgresql {
+    Service['dev.postgresql'] { ensure  => stopped }
+
+    notify { "psql has stopped, maybe":
+    }
+  } 
+
+  class {
+    'patch::setup::stop_dnsmasq':
+  } ->
+
+  class {
+      'patch::setup::stop_psql':
+  }
+ 
+
+
+
+
+
+
+
+
+
+
+  exec { 'patchy db':
+    command => "createdb -U patchy patchy -h localhost",
+  } ->
+  exec { 'patchy_test db':
+    command => "createdb -U patchy patchy_test -h localhost",
+  } ->
+  exec { 'patchy_api db':
+    command => "createdb -U patchy patchy_api -h localhost",
+  }
+
+
+
+
+
+
+
+
+  
+ class patch::setup {
+
+
+  include postgresapp
+  include postgresql
+  include sysctl          # for postgresql  
+  include dnsmasq
+
+  
+
+
+
+
+
+
+
+
+  ############## PSQL stuff ############## 
+
+
+
+  notify { "dnsmasq and psql have stopped, maybe":
+    require => [ Class['patch::setup::stop_dnsmasq'],
+                  Class['patch::setup::stop_psql'],
+                  ],
+  } -> 
+  exec { 'patchy db':
+    command => "createdb -U patchy patchy -h localhost",
+    require => [ Class['patch::setup::stop_dnsmasq'], 
+                  Class['patch::setup::stop_psql'] ],
+  } ->
+  exec { 'patchy_test db':
+    command => "createdb -U patchy patchy_test -h localhost",
+  } ->
+  exec { 'patchy_api db':
+    command => "createdb -U patchy patchy_api -h localhost",
+  }
+
+
+
+
+  class patch::setup::restart_dnsmasq inherits patch::setup::stop_dnsmasq {
+    Service['dev.dnsmasq'] { ensure  => running }
+
+    notify { "dnsmasq has restarted, maybe":
+      require => Exec['patchy_api db'],
+    }
+  }
+
+  class patch::setup::restart_psql inherits patch::setup::stop_psql {
+    Service['dev.postgresql'] { ensure  => running }
+
+    notify { "psql has restarted, maybe":
+      require => Exec['patchy_api db'],
+    }
+  } 
+
+  ### this should restart the servers ###
+
+
+  #include patch::setup::restart_dnsmasq
+  #include patch::setup::restart_psql
+
+
+}

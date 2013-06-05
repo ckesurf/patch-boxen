@@ -1,35 +1,18 @@
 
-  
+
  class patch::setup {
+  #Service['dev.postgresql'] { ensure => stopped }
 
-
-  include postgresapp
-  include postgresql
-  include sysctl          # for postgresql  
-
-  ############## PSQL stuff ############## 
-
-  class patch::setup::stop_nginx inherits nginx {
-    Service['dev.nginx'] { ensure  => stopped }
-  }   
-
-  class patch::setup::stop_psql inherits postgresql {
-    Service['dev.postgresql'] { ensure  => stopped }
-  }
-
-  include patch::setup::stop_nginx
-  include patch::setup::stop_psql
-
+ # exec {'kill psql server':
+  #  command => 'pg_ctl -D /usr/local/var/postgres stop -s -m fast',
+ # }
+  exec {'autostart psql server':
+    command => 'ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents',
+  } ->
+  exec {'manually start psql server':
+    command => 'launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist',
+  } ->
   exec { 'patchy db':
     command => "createdb -U patchy patchy -h localhost",
-    requires => [ Class['patch::setup::stop_nginx'], 
-                  Class['include patch::setup::stop_psql'] ],
-  } ->
-  exec { 'patchy_test db':
-    command => "createdb -U patchy patchy_test -h localhost",
-  } ->
-  exec { 'patchy_api db':
-    command => "createdb -U patchy patchy_api -h localhost",
   }
-
 }
