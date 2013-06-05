@@ -83,6 +83,11 @@ password=P4tch-deploy!",
 
   ############## PSQL stuff ############## 
 
+  exec {'launch link':
+    command => "ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/Launchlaunchctl Agents",
+    require => Class['postgresql'],
+  }
+
   # For creating the patchy superuser
   # I am 99% sure this works. 
   exec { 'superuser':
