@@ -13,12 +13,12 @@
   ############## Credentials ############## 
 
   file { '.ivy2':
-    path => "/Users/${boxen_user}/.ivy2",
+    path => "/Users/${luser}/.ivy2",
     ensure => directory,
   }
 
   file { '.credentials':
-    path => "/Users/${boxen_user}/.ivy2/.credentials",
+    path => "/Users/${luser}/.ivy2/.credentials",
     ensure => present,
     require => File['.ivy2'],
     content => "realm=Sonatype Nexus Repository Manager
@@ -58,19 +58,19 @@ password=P4tch-deploy!",
 
 
   file { 'code':
-    path => "/Users/${boxen_user}/code",
+    path => "/Users/${luser}/code",
     ensure => directory,
   }
 
   exec {'kickass':
-    cwd => "/Users/${boxen_user}/code",
+    cwd => "/Users/${luser}/code",
     command => "git clone git@github.com:patch-engineering/kickass.git",
     require => File['code'],
     timeout => 0,
   }
 
   exec {'submodule':
-    cwd => "/Users/${boxen_user}/code/kickass",
+    cwd => "/Users/${luser}/code/kickass",
     command => "git submodule update --init",
     require => Exec['kickass'],
   }
@@ -145,26 +145,26 @@ Exec['postgis'] -> Exec['patchy postgis'] -> Exec['patchy spatial'] -> Exec['pat
 
 
   exec { 'bundler':
-    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "sudo gem install bundler",
     require => Exec['submodule'],
   }
 
   exec { 'bundle install':
-    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "bundle install",
     require => Exec['bundler'],
   }
 
   file { 'database':
-    path => "/Users/${boxen_user}/code/kickass/migrations/config/database.yml.sample",
+    path => "/Users/${luser}/code/kickass/migrations/config/database.yml.sample",
     ensure => present,
-    source => "/Users/${boxen_user}/code/kickass/migrations/config/database.yml",
+    source => "/Users/${luser}/code/kickass/migrations/config/database.yml",
     require => Exec['bundle install'],
   }
 
   exec { 'migrate':
-    cwd => "/Users/${boxen_user}/code/kickass/migrations/",
+    cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "rake db:migrate",
     require => File['database'],
   }
@@ -174,24 +174,24 @@ Exec['postgis'] -> Exec['patchy postgis'] -> Exec['patchy spatial'] -> Exec['pat
 ############## Setting up the App ############## 
 
   file { 'assets_dims.js.sample':
-    path => "/Users/${boxen_user}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
+    path => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
     ensure => present,
-    source => "/Users/${boxen_user}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
+    source => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
     require => Exec['kickass'],
   }
 
 
   file { 'web: application.conf.sample':
-    path => "/Users/${boxen_user}/code/kickass/web/conf/application.conf.sample",
+    path => "/Users/${luser}/code/kickass/web/conf/application.conf.sample",
     ensure => present,
-    source => "/Users/${boxen_user}/code/kickass/web/conf/application.conf",
+    source => "/Users/${luser}/code/kickass/web/conf/application.conf",
     require => Exec['kickass'],
   }
 
   file { 'api: application.conf.sample':
-    path => "/Users/${boxen_user}/code/kickass/api/conf/application.conf.sample",
+    path => "/Users/${luser}/code/kickass/api/conf/application.conf.sample",
     ensure => present,
-    source => "/Users/${boxen_user}/code/kickass/api/conf/application.conf",
+    source => "/Users/${luser}/code/kickass/api/conf/application.conf",
     require => Exec['kickass'],
   }
 
