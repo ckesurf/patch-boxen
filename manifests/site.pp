@@ -88,15 +88,17 @@ node default {
   }
 
 
-  stage { 'install': require => Stage['main'] }
-  stage { 'psql': require => Stage['install'] }
+#  stage { 'install': require => Stage['main'] }
+#  stage { 'psql': require => Stage['install'] }
   stage { 'setup': require => Stage['psql'] }
   stage { 'app': require => Stage['setup'] }
 
 
-  class {'patch::install':
-    stage => 'install'
-  }
+#  class {'patch::install':
+#    stage => 'install'
+#  }
+
+  stage { 'psql': require => Stage['main'] }
 
   class {'patch::psql':
     stage => 'psql'

@@ -9,7 +9,7 @@
     path => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
     ensure => present,
     source => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
-    require => Exec['kickass'],
+    #require => Exec['kickass'],
   }
 
 
@@ -17,14 +17,14 @@
     path => "/Users/${luser}/code/kickass/web/conf/application.conf.sample",
     ensure => present,
     source => "/Users/${luser}/code/kickass/web/conf/application.conf",
-    require => Exec['kickass'],
+    #require => Exec['kickass'],
   }
 
   file { 'api: application.conf.sample':
     path => "/Users/${luser}/code/kickass/api/conf/application.conf.sample",
     ensure => present,
     source => "/Users/${luser}/code/kickass/api/conf/application.conf",
-    require => Exec['kickass'],
+    #require => Exec['kickass'],
   }
 
 

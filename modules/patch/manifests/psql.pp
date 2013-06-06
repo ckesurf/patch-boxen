@@ -11,18 +11,16 @@ class patch::psql {
   } ->
   exec {'pg db':
     command => "initdb /usr/local/var/postgres -E utf8",
+    user => superuser,
   } ->
   exec {'pg host':
     command => "sed -i.bak 's:host    all             all             127.0.0.1/32            trust:host    all             all             127.0.0.1/32            md5:' /usr/local/var/postgres/pg_hba.conf",
-    require => Exec['pg db'],
   } ->
   exec {'psql conf1':
     command => "sed -i.bak 's:max_connections = 20:max_connections = 50:' /usr/local/var/postgres/postgresql.conf",
-    require => Exec['pg db'],
   } ->
   exec {'psql conf2':
     command => "sed -i.bak 's:shared_buffers = 1600kB:shared_buffers = 500kB:' /usr/local/var/postgres/postgresql.conf",
-    require => Exec['psql conf1'],
   } ->
   exec { 'superuser':
    command => "psql -h localhost postgres -c \"create role patchy with createdb login password 'patchy'; ALTER ROLE patchy WITH SUPERUSER;\"",
