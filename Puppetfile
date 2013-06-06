@@ -37,8 +37,5 @@ github "sudo",       "1.0.0"
 # Optional/custom modules. There are tons available at
 # https://github.com/boxen.
 
-github "postgresapp",		"1.0.0"
-github "postgresql",		"1.0.1"
-github "sysctl",			"1.0.0" 		# for postgresql
 github "sublime_text_2",	"1.1.1"
 github "java",				"1.1.1"

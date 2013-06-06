@@ -87,11 +87,27 @@ node default {
     target => $boxen::config::repodir
   }
 
-  stage { 'last': require => Stage['main'] }
-  
 
-  class {'patch::setup':
-    stage => 'last'
+  stage { 'install': require => Stage['main'] }
+  stage { 'psql': require => Stage['install'] }
+  stage { 'setup': require => Stage['psql'] }
+  stage { 'app': require => Stage['setup'] }
+
+
+  class {'patch::install':
+    stage => 'install'
+  }
+
+  class {'patch::psql':
+    stage => 'psql'
+  }
+
+  class {'setup':
+    stage => 'setup'
+  }
+
+  class {'app':
+    stage => 'app'
   }
 
 
