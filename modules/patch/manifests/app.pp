@@ -7,23 +7,19 @@ class patch::app {
   exec { 'bundler':
     cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "sudo gem install bundler",
-    require => Exec['submodule'],
   } ->
   exec { 'bundle install':
     cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "bundle install",
-    require => Exec['bundler'],
   } ->
   file { 'database':
     path => "/Users/${luser}/code/kickass/migrations/config/database.yml.sample",
     ensure => present,
     source => "/Users/${luser}/code/kickass/migrations/config/database.yml",
-    require => Exec['bundle install'],
   } ->
   exec { 'migrate':
     cwd => "/Users/${luser}/code/kickass/migrations/",
     command => "rake db:migrate",
-    require => File['database'],
   } ->
   exec { 'redis':
     command => "brew install redis",

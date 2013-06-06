@@ -36,13 +36,10 @@
   exec { 'newline':
     command => "echo \$\"\\n# chriswashere\" >> /etc/hosts",
     user => root,
-    require => Class['postgresql'],
-
   } ->
   exec { 'subdomains':
     command => "/usr/local/bin/psql -U patchy -A -tc \"SELECT subdomain FROM communities;\" | column -t | sed -e 's/^/127.0.0.1 /' -e 's/\$/.patch.local/' >> /etc/hosts",
     user => root,
-    require => Exec['newline'],
   }
 
 

@@ -102,11 +102,11 @@ node default {
     stage => 'psql'
   }
 
-  class {'setup':
+  class {'patch::setup':
     stage => 'setup'
   }
 
-  class {'app':
+  class {'patch::app':
     stage => 'app'
   }
 
