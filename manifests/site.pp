@@ -98,6 +98,7 @@ node default {
 #    stage => 'install'
 #  }
 
+
   stage { 'psql': require => Stage['main'] }
 
   class {'patch::psql':

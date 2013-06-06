@@ -26,7 +26,7 @@ class patch::app {
     timeout => 0,
   } ->
   exec { 'autostart redis':
-    command => "ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents",
+    command => "ln -sfv /opt/boxen/homebrew/opt/redis/*.plist ~/Library/LaunchAgents",
   } ->
   exec { 'manually start redis':
   	command => "launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist",
