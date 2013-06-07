@@ -11,7 +11,7 @@ Exec {
     "${boxen::config::home}/rbenv/shims",
     "${boxen::config::home}/rbenv/bin",
     "${boxen::config::home}/rbenv/plugins/ruby-build/bin",
-    "${boxen::config::home}/homebrew/bin",
+    "${boxen::config::home}/homebrew/",
     '/usr/bin',
     '/bin',
     '/usr/sbin',
@@ -61,17 +61,6 @@ node default {
     fail('Please enable full disk encryption and try again')
   }
 
-  # node versions
-  include nodejs::v0_4
-  include nodejs::v0_6
-  include nodejs::v0_8
-  include nodejs::v0_10
-
-  # default ruby versions
-  include ruby::1_8_7
-  include ruby::1_9_2
-  include ruby::1_9_3
-  include ruby::2_0_0
 
   # common, useful packages
   package {
@@ -90,7 +79,7 @@ node default {
 
 #  stage { 'install': require => Stage['main'] }
 #  stage { 'psql': require => Stage['install'] }
-  stage { 'setup': require => Stage['psql'] }
+ # stage { 'setup': require => Stage['psql'] }
   stage { 'app': require => Stage['setup'] }
 
 
@@ -99,11 +88,21 @@ node default {
 #  }
 
 
-  stage { 'psql': require => Stage['main'] }
+#  stage { 'psql': require => Stage['main'] }
 
-  class {'patch::psql':
-    stage => 'psql'
-  }
+ # class {'patch::psql':
+#    stage => 'psql'
+#  }
+
+  include postgresapp
+
+  # default ruby
+  include ruby::1_9_3
+
+
+
+  stage { 'setup': require => Stage['main'] }
+
 
   class {'patch::setup':
     stage => 'setup'

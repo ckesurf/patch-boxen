@@ -14,16 +14,16 @@
 
 
   file { 'web: application.conf.sample':
-    path => "/Users/${luser}/code/kickass/web/conf/application.conf.sample",
+    path => "/Users/${luser}/code/kickass/web/conf/application.conf",
     ensure => present,
-    source => "/Users/${luser}/code/kickass/web/conf/application.conf",
+    source => "/Users/${luser}/code/kickass/web/conf/application.conf.sample",
     #require => Exec['kickass'],
   }
 
   file { 'api: application.conf.sample':
-    path => "/Users/${luser}/code/kickass/api/conf/application.conf.sample",
+    path => "/Users/${luser}/code/kickass/api/conf/application.conf",
     ensure => present,
-    source => "/Users/${luser}/code/kickass/api/conf/application.conf",
+    source => "/Users/${luser}/code/kickass/api/conf/application.conf.sample",
     #require => Exec['kickass'],
   }
 
@@ -34,11 +34,11 @@
 
 
   exec { 'newline':
-    command => "echo \$\"\\n# chriswashere\" >> /etc/hosts",
+    command => "echo \$\"\\n# kickass\" >> /etc/hosts",
     user => root,
   } ->
   exec { 'subdomains':
-    command => "/usr/local/bin/psql -U patchy -A -tc \"SELECT subdomain FROM communities;\" | column -t | sed -e 's/^/127.0.0.1 /' -e 's/\$/.patch.local/' >> /etc/hosts",
+    command => "/opt/boxen/homebrew/bin/psql -U patchy -A -tc \"SELECT subdomain FROM communities;\" | column -t | sed -e 's/^/127.0.0.1 /' -e 's/\$/.patch.local/' >> /etc/hosts",
     user => root,
   }
 

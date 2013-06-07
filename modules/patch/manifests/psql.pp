@@ -10,10 +10,16 @@ class patch::psql {
     command => "brew install postgres",
   } ->
   exec {'pg db':
-    command => "echo \"initdb /opt/boxen/homebrew/var/postgres -E utf8\" | sudo su",
+    command => "initdb /opt/boxen/homebrew/var/postgres -E utf8",
   } ->
   exec {'pg host':
     command => "sed -i.bak 's:host    all             all             127.0.0.1/32            trust:host    all             all             127.0.0.1/32            md5:' /opt/boxen/homebrew/var/postgres/pg_hba.conf",
+  } ->
+  exec {'autostart psql server':
+    command => 'ln -sfv /opt/boxen/homebrew/Cellar/postgresql/*/*postgresql.plist ~/Library/LaunchAgents',
+  } ->
+  exec {'manually start psql server':
+    command => 'launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist',
   } ->
   exec {'psql conf1':
     command => "sed -i.bak 's:max_connections = 20:max_connections = 50:' /opt/boxen/homebrew/var/postgres/postgresql.conf",
@@ -23,12 +29,6 @@ class patch::psql {
   } ->
   exec { 'superuser':
    command => "psql -h localhost postgres -c \"create role patchy with createdb login password 'patchy'; ALTER ROLE patchy WITH SUPERUSER;\"",
-  } ->
-  exec {'autostart psql server':
-    command => 'ln -sfv /opt/boxen/homebrew/opt/postgresql/*.plist ~/Library/LaunchAgents',
-  } ->
-  exec {'manually start psql server':
-    command => 'launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist',
   } ->
   exec { 'patchy db':
     command => "createdb -U patchy patchy -h localhost",
