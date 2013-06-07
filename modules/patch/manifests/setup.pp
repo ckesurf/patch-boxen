@@ -6,10 +6,9 @@
 ############## Setting up the App ############## 
 
   file { 'assets_dims.js.sample':
-    path => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
+    path => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
     ensure => present,
-    source => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js",
-    #require => Exec['kickass'],
+    source => "/Users/${luser}/code/kickass/web/app/assets/javascripts/patch/modules/config/assets_dims.js.sample",
   }
 
 
@@ -17,14 +16,12 @@
     path => "/Users/${luser}/code/kickass/web/conf/application.conf",
     ensure => present,
     source => "/Users/${luser}/code/kickass/web/conf/application.conf.sample",
-    #require => Exec['kickass'],
   }
 
   file { 'api: application.conf.sample':
     path => "/Users/${luser}/code/kickass/api/conf/application.conf",
     ensure => present,
     source => "/Users/${luser}/code/kickass/api/conf/application.conf.sample",
-    #require => Exec['kickass'],
   }
 
 

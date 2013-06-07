@@ -2,16 +2,16 @@
 
 class patch::install  {
 
-  ############## Text Editor ############## 
+  ############## Text Editor, Chrome, and Java ############## 
 
   include sublime_text_2
   sublime_text_2::package { 'Emmet':
       source => 'sergeche/emmet-sublime'
   }
-
-  ############## Java ############## 
-
+  
+  include chrome
   include java
+
 
   ############## For Kickass ############## 
 
